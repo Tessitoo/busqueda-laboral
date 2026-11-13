@@ -1,5 +1,6 @@
 ubicacion: "Chile"
 horas_antiguedad: 48  # Busca ofertas publicadas en las últimas 48 horas
+max_anos_experiencia: 1  # Descarta ofertas que pidan 2 o más años de experiencia
 
 # 1. Términos que buscará en LinkedIn, Indeed y Google Jobs
 busquedas:
