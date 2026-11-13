@@ -1,25 +1,28 @@
 ubicacion: "Chile"
-horas_antiguedad: 48  # Busca ofertas publicadas en las últimas 48 horas
-max_anos_experiencia: 1  # Descarta ofertas que pidan 2 o más años de experiencia
+horas_antiguedad: 48
+max_anos_experiencia: 2       # Bloquea ofertas que pidan 2 o más años de experiencia
+excluir_practicas: true       # Bloquea prácticas profesionales y memorias de título
 
-# 1. Términos que buscará en LinkedIn, Indeed y Google Jobs
+# 1. Búsquedas dirigidas a tus fortalezas técnicas
 busquedas:
   - "Ingeniero Civil Electricista estudios"
   - "Ingeniero Estudios Electricos"
+  - "Ingeniero Estudios Sistemicos"
   - "Ingeniero Protecciones Electricas"
-  - "Sistemas de Potencia junior"
+  - "Ingeniero Sistemas de Potencia"
   - "DIgSILENT"
-  - "ETAP"
   - "Ingeniero Electrico Trainee"
-  - "Mallas puesta a tierra"
+  - "Ingeniero Junior Energia"
+  - "Ingeniero BESS"
+  - "Ingeniero Electronica de Potencia"
 
-# 2. Portales agregadores activos (opciones: linkedin, indeed, google)
+# 2. Portales agregadores activos
 portales:
   - "linkedin"
   - "indeed"
   - "google"
 
-# 3. Palabras clave obligatorias en el título o descripción (basta con que cumpla una)
+# 3. Filtro base: debe contener al menos una palabra del rubro eléctrico/energía
 palabras_clave_area:
   - "eléctric"
   - "electric"
@@ -35,12 +38,54 @@ palabras_clave_area:
   - "sistemico"
   - "transmisión"
   - "transmision"
-  - "distribución"
-  - "distribucion"
-  - "energía"
-  - "energia"
+  - "ernc"
+  - "bess"
+  - "fotovoltaic"
+  - "eólic"
+  - "eolic"
+  - "convertidor"
 
-# 4. Filtro anti-Senior: Si el título contiene alguna de estas palabras, se descarta
+# 4. Palabras que SUMAN PUNTOS según tu CV y experiencia
+puntajes_perfil:
+  # Tu experiencia directa (Máximo puntaje)
+  "estudios eléctricos": 25
+  "estudios electricos": 25
+  "estudios sistémicos": 25
+  "estudios sistemicos": 25
+  "digsilent": 25
+  "protecciones": 20
+  "puesta a tierra": 20
+  "mallas": 20
+  "flujo de potencia": 20
+  "cortocircuito": 20
+  "coordinación de protecciones": 20
+  # Tu perfil junior / recién titulada
+  "junior": 20
+  "trainee": 20
+  "recién egresad": 20
+  "recien egresad": 20
+  "sin experiencia": 20
+  "ingeniero civil electricista": 15
+  # Tu tesis, laboratorio y software (Electrónica de potencia / ERNC / BESS)
+  "plecs": 15
+  "simulink": 15
+  "matlab": 15
+  "psim": 15
+  "electrónica de potencia": 15
+  "electronica de potencia": 15
+  "bess": 15
+  "ernc": 12
+  "inversor": 12
+  "convertidor": 12
+  # Tu práctica en Tecnored y ayudantía (Ofertas / Proyectos / ITO)
+  "etap": 12
+  "planos": 10
+  "ofertas": 10
+  "propuestas": 10
+  "ito": 8
+  "inspección técnica": 8
+
+# 5. Filtro de exclusión en el título
 excluir_en_titulo:
   - "senior"
   - "sr."
@@ -54,9 +99,12 @@ excluir_en_titulo:
   - "superintendente"
   - "coordinador"
   - "especialista"
+  - "maestro"
+  - "técnico eléctrico"
+  - "tecnico electrico"
+  - "mantenedor"
 
-# 5. Páginas directas de empresas eléctricas y consultoras en Chile
-# El script revisará si aparecen enlaces nuevos con tus palabras clave
+# 6. Empresas eléctricas, transmisoras, generadoras y consultoras en Chile
 empresas_directas:
   - nombre: "Transelec"
     url: "https://www.transelec.cl/trabaja-con-nosotros/"
@@ -78,3 +126,9 @@ empresas_directas:
     url: "https://www.worley.com/careers"
   - nombre: "KAS Ingeniería"
     url: "https://www.kas.cl/trabaja-con-nosotros/"
+  - nombre: "Tecnored"
+    url: "https://www.tecnored.cl/trabaja-con-nosotros/"
+  - nombre: "AES Andes"
+    url: "https://www.aesandes.com/es/trabaja-con-nosotros"
+  - nombre: "Acciona Energía"
+    url: "https://www.acciona.cl/trabaja-con-nosotros/"
