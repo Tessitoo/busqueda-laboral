@@ -1,0 +1,79 @@
+ubicacion: "Chile"
+horas_antiguedad: 48  # Busca ofertas publicadas en las últimas 48 horas
+
+# 1. Términos que buscará en LinkedIn, Indeed y Google Jobs
+busquedas:
+  - "Ingeniero Civil Electricista estudios"
+  - "Ingeniero Estudios Electricos"
+  - "Ingeniero Protecciones Electricas"
+  - "Sistemas de Potencia junior"
+  - "DIgSILENT"
+  - "ETAP"
+  - "Ingeniero Electrico Trainee"
+  - "Mallas puesta a tierra"
+
+# 2. Portales agregadores activos (opciones: linkedin, indeed, google)
+portales:
+  - "linkedin"
+  - "indeed"
+  - "google"
+
+# 3. Palabras clave obligatorias en el título o descripción (basta con que cumpla una)
+palabras_clave_area:
+  - "eléctric"
+  - "electric"
+  - "potencia"
+  - "proteccion"
+  - "protección"
+  - "digsilent"
+  - "etap"
+  - "malla"
+  - "subestacion"
+  - "subestación"
+  - "sistémico"
+  - "sistemico"
+  - "transmisión"
+  - "transmision"
+  - "distribución"
+  - "distribucion"
+  - "energía"
+  - "energia"
+
+# 4. Filtro anti-Senior: Si el título contiene alguna de estas palabras, se descarta
+excluir_en_titulo:
+  - "senior"
+  - "sr."
+  - "jefe"
+  - "jefatura"
+  - "gerente"
+  - "subgerente"
+  - "líder"
+  - "lider"
+  - "director"
+  - "superintendente"
+  - "coordinador"
+  - "especialista"
+
+# 5. Páginas directas de empresas eléctricas y consultoras en Chile
+# El script revisará si aparecen enlaces nuevos con tus palabras clave
+empresas_directas:
+  - nombre: "Transelec"
+    url: "https://www.transelec.cl/trabaja-con-nosotros/"
+  - nombre: "Grupo Saesa"
+    url: "https://www.gruposaesa.cl/saesa/trabaja-con-nosotros"
+  - nombre: "CGE"
+    url: "https://www.cge.cl/trabaja-con-nosotros/"
+  - nombre: "Colbún"
+    url: "https://www.colbun.cl/trabaja-con-nosotros"
+  - nombre: "Engie Chile"
+    url: "https://engie-energia.cl/trabaja-con-nosotros/"
+  - nombre: "Enel Chile"
+    url: "https://www.enel.cl/es/conoce-enel/trabaja-con-nosotros.html"
+  - nombre: "Coordinador Eléctrico Nacional"
+    url: "https://www.coordinador.cl/trabaja-con-nosotros/"
+  - nombre: "Hatch"
+    url: "https://jobs.hatch.com/go/Engineering/4466200/"
+  - nombre: "Worley"
+    url: "https://www.worley.com/careers"
+  - nombre: "KAS Ingeniería"
+    url: "https://www.kas.cl/trabaja-con-nosotros/"
