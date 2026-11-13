@@ -37,7 +37,7 @@ def cumple_filtros(titulo, descripcion, config):
             return False
 
     # 2. Descartar ofertas que pidan 2 o más años de experiencia en la descripción
-    max_anos = config.get("max_anos_experiencia", 1)
+    max_anos = config.get("max_anos_experiencia", 2)
     patrones_experiencia = [
         r'(?:mínimo|minimo|al menos|más de|mas de|desde|sobre|entre)?\s*(\d+)\s*(?:\+|a\s*\d+|o\s*más|o\s*mas)?\s*años?\s+de\s+experiencia',
         r'experiencia\s+(?:mínima|minima|comprobable|previa|laboral)?\s*(?:de|mayor a|superior a)?\s*(\d+)\s*(?:\+|a\s*\d+|o\s*más|o\s*mas)?\s*años?'
