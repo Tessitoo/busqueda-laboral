@@ -3,6 +3,7 @@ import json
 import yaml
 import smtplib
 import requests
+import re
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -27,14 +28,26 @@ def guardar_historial(historial):
 
 def cumple_filtros(titulo, descripcion, config):
     titulo_lower = str(titulo).lower()
-    texto_completo = f"{titulo_lower} {str(descripcion).lower()}"
+    desc_lower = str(descripcion).lower()
+    texto_completo = f"{titulo_lower} {desc_lower}"
 
-    # 1. Descartar cargos Senior/Jefaturas
+    # 1. Descartar cargos Senior/Jefaturas en el título
     for excl in config["excluir_en_titulo"]:
         if excl.lower() in titulo_lower:
             return False
 
-    # 2. Verificar que pertenezca al área eléctrica / potencia
+    # 2. Descartar ofertas que pidan 2 o más años de experiencia en la descripción
+    max_anos = config.get("max_anos_experiencia", 1)
+    patrones_experiencia = [
+        r'(?:mínimo|minimo|al menos|más de|mas de|desde|sobre|entre)?\s*(\d+)\s*(?:\+|a\s*\d+|o\s*más|o\s*mas)?\s*años?\s+de\s+experiencia',
+        r'experiencia\s+(?:mínima|minima|comprobable|previa|laboral)?\s*(?:de|mayor a|superior a)?\s*(\d+)\s*(?:\+|a\s*\d+|o\s*más|o\s*mas)?\s*años?'
+    ]
+    for patron in patrones_experiencia:
+        for match in re.findall(patron, texto_completo):
+            if int(match) > max_anos:
+                return False
+
+    # 3. Verificar que pertenezca al área eléctrica / potencia
     for kw in config["palabras_clave_area"]:
         if kw.lower() in texto_completo:
             return True
