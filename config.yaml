@@ -1,5 +1,5 @@
 ubicacion: "Chile"
-horas_antiguedad: 48
+horas_antiguedad: 168
 max_anos_experiencia: 2       # Bloquea ofertas que pidan 2 o más años de experiencia
 excluir_practicas: true       # Bloquea prácticas profesionales y memorias de título
 
