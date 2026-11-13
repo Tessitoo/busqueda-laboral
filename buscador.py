@@ -113,6 +113,19 @@ def buscar_en_empresas_directas(config, historial):
     ofertas_directas = []
     headers = {"User-Agent": "Mozilla/5.0"}
 
+    # Palabras que indican que el enlace SÍ es una oferta o portal de postulación
+    indicadores_vacante = [
+        "ingenier", "analista", "trainee", "junior", "practic", "empleo",
+        "vacante", "postula", "career", "job", "oferta", "convocatoria",
+        "workday", "successfactors", "greenhouse", "lever", "buk", "rankmi", "airtable"
+    ]
+
+    # Palabras en la URL que indican que es una sección informativa de la empresa (NO un empleo)
+    rutas_informativas = [
+        "nuestras-energias", "noticias", "prensa", "sostenibilidad",
+        "inversionistas", "quienes-somos", "contacto", "proveedores", "blog"
+    ]
+
     for emp in config.get("empresas_directas", []):
         try:
             resp = requests.get(emp["url"], headers=headers, timeout=15)
@@ -123,7 +136,17 @@ def buscar_en_empresas_directas(config, historial):
                 if not href.startswith("http"):
                     href = requests.compat.urljoin(emp["url"], href)
 
-                if len(texto) < 8 or href in historial:
+                texto_y_url = f"{texto.lower()} {href.lower()}"
+
+                if len(texto) < 10 or href in historial or href.rstrip("/") == emp["url"].rstrip("/"):
+                    continue
+
+                # 1. Descartar secciones informativas del menú (ej. centrales, noticias)
+                if any(ruta in href.lower() for ruta in rutas_informativas):
+                    continue
+
+                # 2. Exigir que el enlace o título parezca realmente un cargo o plataforma de postulación
+                if not any(ind in texto_y_url for ind in indicadores_vacante):
                     continue
 
                 valida, puntaje, matches = evaluar_oferta(texto, texto, config)
@@ -135,7 +158,7 @@ def buscar_en_empresas_directas(config, historial):
                         "ubicacion": "Chile (Web Directa)",
                         "fuente": "Portal Empresa",
                         "url": href,
-                        "puntaje": puntaje + 15,  # Bonus por ser página directa de empresa clave
+                        "puntaje": puntaje + 15,
                         "matches": matches[:5]
                     })
         except Exception as e:
