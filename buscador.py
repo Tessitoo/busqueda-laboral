@@ -1,0 +1,151 @@
+import os
+import json
+import yaml
+import smtplib
+import requests
+from bs4 import BeautifulSoup
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from jobspy import scrape_jobs
+import pandas as pd
+
+HISTORIAL_FILE = "historial_ofertas.json"
+
+def cargar_config():
+    with open("config.yaml", "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+def cargar_historial():
+    if os.path.exists(HISTORIAL_FILE):
+        with open(HISTORIAL_FILE, "r", encoding="utf-8") as f:
+            return set(json.load(f))
+    return set()
+
+def guardar_historial(historial):
+    with open(HISTORIAL_FILE, "w", encoding="utf-8") as f:
+        json.dump(list(historial), f, indent=2)
+
+def cumple_filtros(titulo, descripcion, config):
+    titulo_lower = str(titulo).lower()
+    texto_completo = f"{titulo_lower} {str(descripcion).lower()}"
+
+    # 1. Descartar cargos Senior/Jefaturas
+    for excl in config["excluir_en_titulo"]:
+        if excl.lower() in titulo_lower:
+            return False
+
+    # 2. Verificar que pertenezca al área eléctrica / potencia
+    for kw in config["palabras_clave_area"]:
+        if kw.lower() in texto_completo:
+            return True
+    return False
+
+def buscar_en_portales(config, historial):
+    ofertas_nuevas = []
+    for termino in config["busquedas"]:
+        try:
+            jobs = scrape_jobs(
+                site_name=config["portales"],
+                search_term=termino,
+                location=config["ubicacion"],
+                results_wanted=15,
+                hours_old=config["horas_antiguedad"],
+                country_indeed="Chile"
+            )
+            if jobs is None or jobs.empty:
+                continue
+
+            for _, row in jobs.iterrows():
+                url = str(row.get("job_url", ""))
+                titulo = str(row.get("title", "Sin título"))
+                empresa = str(row.get("company", "Empresa confidencial"))
+                ubicacion = str(row.get("location", "Chile"))
+                portal = str(row.get("site", ""))
+                descripcion = str(row.get("description", ""))
+
+                if not url or url in historial:
+                    continue
+
+                if cumple_filtros(titulo, descripcion, config):
+                    historial.add(url)
+                    ofertas_nuevas.append({
+                        "titulo": titulo,
+                        "empresa": empresa,
+                        "ubicacion": ubicacion,
+                        "fuente": portal.capitalize(),
+                        "url": url
+                    })
+        except Exception as e:
+            print(f"Error buscando '{termino}': {e}")
+    return ofertas_nuevas
+
+def buscar_en_empresas_directas(config, historial):
+    ofertas_directas = []
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    for emp in config.get("empresas_directas", []):
+        try:
+            resp = requests.get(emp["url"], headers=headers, timeout=15)
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for a in soup.find_all("a", href=True):
+                texto = a.get_text(strip=True)
+                href = a["href"]
+                if not href.startswith("http"):
+                    href = requests.compat.urljoin(emp["url"], href)
+
+                if len(texto) < 8 or href in historial:
+                    continue
+
+                if cumple_filtros(texto, texto, config):
+                    historial.add(href)
+                    ofertas_directas.append({
+                        "titulo": texto,
+                        "empresa": emp["nombre"],
+                        "ubicacion": "Chile (Web Directa)",
+                        "fuente": "Portal Empresa",
+                        "url": href
+                    })
+        except Exception as e:
+            print(f"No se pudo revisar {emp['nombre']}: {e}")
+    return ofertas_directas
+
+def enviar_correo(ofertas):
+    remitente = os.environ["EMAIL_USER"]
+    password = os.environ["EMAIL_PASS"]
+    destinatario = os.environ.get("EMAIL_TO", remitente)
+
+    if not ofertas:
+        print("No hay ofertas nuevas hoy.")
+        return
+
+    html = f"<h2>⚡ {len(ofertas)} Nuevas Oportunidades en Ingeniería Eléctrica</h2><ul>"
+    for o in ofertas:
+        html += (
+            f"<li style='margin-bottom:12px;'>"
+            f"<strong><a href='{o['url']}'>{o['titulo']}</a></strong><br>"
+            f"🏢 {o['empresa']} | 📍 {o['ubicacion']} | 🌐 <em>{o['fuente']}</em>"
+            f"</li>"
+        )
+    html += "</ul>"
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"⚡ {len(ofertas)} ofertas nuevas: Estudios Eléctricos / Potencia"
+    msg["From"] = remitente
+    msg["To"] = destinatario
+    msg.attach(MIMEText(html, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(remitente, password)
+        server.sendmail(remitente, destinatario, msg.as_string())
+    print(f"Correo enviado con {len(ofertas)} ofertas.")
+
+if __name__ == "__main__":
+    config = cargar_config()
+    historial = cargar_historial()
+
+    nuevas_portales = buscar_en_portales(config, historial)
+    nuevas_empresas = buscar_en_empresas_directas(config, historial)
+
+    total = nuevas_portales + nuevas_empresas
+    guardar_historial(historial)
+    enviar_correo(total)
